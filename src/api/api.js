@@ -10,7 +10,7 @@ const getBaseURL = () => {
     return '/api';
   }
   // Production: use environment variable or default
-  const apiUrl = import.meta.env.VITE_API_URL || 'https://sharksphere.onrender.com';
+  const apiUrl = import.meta.env.VITE_API_URL || 'https://sharksphere-myqq.onrender.com';
   const baseURL = apiUrl.endsWith('/api') ? apiUrl : `${apiUrl}/api`;
   return baseURL;
 };
