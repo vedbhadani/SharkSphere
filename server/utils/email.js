@@ -6,7 +6,13 @@ import { fileURLToPath } from 'url';
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 dotenv.config({ path: path.resolve(__dirname, '../../.env') });
-const resend = new Resend(process.env.RESEND_API_KEY);
+let resend;
+if (process.env.RESEND_API_KEY) {
+  resend = new Resend(process.env.RESEND_API_KEY);
+} else {
+  console.warn("⚠️ RESEND_API_KEY is missing. Email features will be disabled.");
+  resend = { emails: { send: async () => ({ error: { message: "RESEND_API_KEY not configured" } }) } };
+}
 
 const APP_NAME = 'Shark Sphere';
 const BRAND_COLOR = '#7B5FFF';
