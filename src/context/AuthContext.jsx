@@ -11,6 +11,7 @@ export const AuthProvider = ({ children }) => {
     try {
       const response = await getMe();
       if (response?.success) {
+        console.log('Fetched User Data:', response.user);
         setUser(response.user);
       }
     } catch (error) {

@@ -9,6 +9,8 @@ import Signup from '../pages/Signup.jsx';
 import Dashboard from '../pages/Dashboard.jsx';
 import CreateIdea from '../pages/CreateIdea.jsx';
 import Profile from '../pages/Profile.jsx';
+import AdminGuard from '../components/AdminGuard.jsx';
+import AdminDashboard from '../pages/AdminDashboard.jsx';
 
 const AnimatedRoutes = () => {
   const location = useLocation();
@@ -43,6 +45,9 @@ const AnimatedRoutes = () => {
             </PrivateRoute>
           }
         />
+        <Route element={<AdminGuard />}>
+          <Route path="/admin" element={<AdminDashboard />} />
+        </Route>
       </Routes>
     </AnimatePresence>
   );

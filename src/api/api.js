@@ -6,8 +6,8 @@ const getBaseURL = () => {
   // Check if we're in development mode
   const isDev = import.meta.env.DEV || import.meta.env.MODE === 'development';
   if (isDev) {
-    // Development: use localhost directly
-    return 'https://sharksphere.onrender.com/api';
+    // Development: use Vite proxy to localhost:3000
+    return '/api';
   }
   // Production: use environment variable or default
   const apiUrl = import.meta.env.VITE_API_URL || 'https://sharksphere.onrender.com';
@@ -54,7 +54,7 @@ api.interceptors.response.use(
     if (error.code === 'ECONNABORTED' && !import.meta.env.DEV && error.config) {
       error.config.__retryCount = error.config.__retryCount || 0;
       const maxRetries = 1; // Retry once
-      
+
       if (error.config.__retryCount < maxRetries) {
         error.config.__retryCount += 1;
         console.log(`Retrying request (attempt ${error.config.__retryCount}/${maxRetries})...`);
