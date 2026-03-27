@@ -4,10 +4,11 @@ import cors from 'cors';
 import router from './routes/authRoutes.js';
 import ideaRoutes from './routes/ideaRoutes.js';
 import voteRoutes from './routes/voteRoutes.js';
+import adminRoutes from './routes/adminRoutes.js';
 
 const app = express();
 const PORT = process.env.PORT || 3000;
-dotenv.config();
+dotenv.config({ path: '../.env' });
 
 // CORS configuration - Allow requests from frontend domains
 // const allowedOrigins = [
@@ -24,7 +25,7 @@ app.use(cors({
   origin: function (origin, callback) {
     // Allow requests with no origin (like mobile apps or curl requests)
     if (!origin) return callback(null, true);
-    
+
     // Check if origin matches any allowed origin (string or regex)
     const isAllowed = allowedOrigins.some(allowed => {
       if (typeof allowed === 'string') {
@@ -34,7 +35,7 @@ app.use(cors({
       }
       return false;
     });
-    
+
     if (isAllowed) {
       callback(null, true);
     } else {
@@ -46,13 +47,14 @@ app.use(cors({
   allowedHeaders: ['Content-Type', 'Authorization']
 }));
 
-app.use(express.json()); 
-app.use(express.urlencoded({ extended: true })); 
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
 
 
 app.use('/api/auth', router);
 app.use('/api/ideas', ideaRoutes);
-app.use('/api/ideas',voteRoutes);
+app.use('/api/ideas', voteRoutes);
+app.use('/api/admin', adminRoutes);
 
 app.get('/', (req, res) => {
   res.json({ message: 'Entrepreneurship Club API is running!' });

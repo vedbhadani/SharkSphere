@@ -2,7 +2,7 @@ import prisma from "../config/db.js";
 
 export const createIdea = async (req, res) => {
   try {
-    const { title, description } = req.body;
+    const { title, description, researchLink } = req.body;
     const userId = req.user.id;
 
     // Validate input
@@ -32,6 +32,7 @@ export const createIdea = async (req, res) => {
       data: {
         title: title.trim(),
         description: description.trim(),
+        researchLink: researchLink ? researchLink.trim() : null,
         authorId: userId
       },
       include: {
@@ -59,6 +60,7 @@ export const createIdea = async (req, res) => {
 export const getAllIdeas = async (req, res) => {
   try {
     const ideas = await prisma.idea.findMany({
+      where: { status: 'APPROVED' },
       include: {
         author: {
           select: { id: true, name: true, email: true }
@@ -78,7 +80,9 @@ export const getAllIdeas = async (req, res) => {
         id: idea.id,
         title: idea.title,
         description: idea.description,
+        researchLink: idea.researchLink,
         author: idea.author,
+        stage: idea.stage,
         createdAt: idea.createdAt,
         updatedAt: idea.updatedAt,
         votes: {
@@ -138,7 +142,9 @@ export const getIdeaById = async (req, res) => {
         id: idea.id,
         title: idea.title,
         description: idea.description,
+        researchLink: idea.researchLink,
         author: idea.author,
+        stage: idea.stage,
         createdAt: idea.createdAt,
         updatedAt: idea.updatedAt,
         votes: {
@@ -160,7 +166,7 @@ export const getIdeaById = async (req, res) => {
 export const updateIdea = async (req, res) => {
   try {
     const { id } = req.params;
-    const { title, description } = req.body;
+    const { title, description, researchLink } = req.body;
     const userId = req.user.id;
 
     // Find idea
@@ -211,7 +217,8 @@ export const updateIdea = async (req, res) => {
       where: { id },
       data: {
         title: title.trim(),
-        description: description.trim()
+        description: description.trim(),
+        researchLink: researchLink ? researchLink.trim() : null
       },
       include: {
         author: {

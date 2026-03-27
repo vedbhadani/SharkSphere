@@ -5,11 +5,11 @@ export const validateRegister = (data) => {
   const schema = Joi.object({
     email: Joi.string()
       .email()
-      .pattern(/@adypu\.edu\.in$/)
+      // .pattern(/@adypu\.edu\.in$/)
       .required()
       .messages({
         'string.email': 'Please provide a valid email address',
-        'string.pattern.base': 'Email must be from ADYPU college domain (@adypu.edu.in)',
+        // 'string.pattern.base': 'Email must be from ADYPU college domain (@adypu.edu.in)',
         'any.required': 'Email is required'
       }),
     password: Joi.string()
