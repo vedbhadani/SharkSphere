@@ -6,7 +6,7 @@ import { fileURLToPath } from 'url';
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 dotenv.config({ path: path.resolve(__dirname, '../../.env') });
-const resend = new Resend(process.env.RESEND_API_KEY);
+const resend = process.env.RESEND_API_KEY ? new Resend(process.env.RESEND_API_KEY) : null;
 
 const APP_NAME = 'Shark Sphere';
 const BRAND_COLOR = '#7B5FFF';
@@ -69,6 +69,10 @@ const announcementTemplate = ({ ideaTitle, founderName, ideaLink }) => `
  * Send branded global announcement email using Resend
  */
 export const sendGlobalNewIdeaEmail = async ({ to, ideaTitle, founderName, ideaLink }) => {
+  if (!resend) {
+    console.log(`[Email Mock] Global announcement would have been sent to ${to} for idea ${ideaTitle}`);
+    return { success: true, email: to, messageId: 'mock-id' };
+  }
   try {
     const html = announcementTemplate({ ideaTitle, founderName, ideaLink });
 

@@ -6,7 +6,7 @@ import { fileURLToPath } from 'url';
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 dotenv.config({ path: path.resolve(__dirname, '../../.env') });
-const resend = new Resend(process.env.RESEND_API_KEY);
+const resend = process.env.RESEND_API_KEY ? new Resend(process.env.RESEND_API_KEY) : null;
 
 const APP_NAME = 'Shark Sphere';
 const BRAND_COLOR = '#7B5FFF';
@@ -42,6 +42,10 @@ const emailTemplate = (content) => `
 `;
 
 export const sendApprovalEmail = async (userEmail, ideaTitle) => {
+  if (!resend) {
+    console.log(`[Email Mock] Approval email would have been sent to ${userEmail}`);
+    return;
+  }
   try {
     const html = emailTemplate(`
       <h1>Congratulations! 🚀</h1>
@@ -69,6 +73,10 @@ export const sendApprovalEmail = async (userEmail, ideaTitle) => {
 };
 
 export const sendRejectionEmail = async (userEmail, ideaTitle, reason) => {
+  if (!resend) {
+    console.log(`[Email Mock] Rejection email would have been sent to ${userEmail}`);
+    return;
+  }
   try {
     const html = emailTemplate(`
       <h1>Idea Review Update</h1>
@@ -99,6 +107,10 @@ export const sendRejectionEmail = async (userEmail, ideaTitle, reason) => {
 };
 
 export const sendVerificationEmail = async (email, token) => {
+  if (!resend) {
+    console.log(`[Email Mock] Verification email would have been sent to ${email} with token ${token}`);
+    return;
+  }
   try {
     const backendUrl = process.env.BACKEND_URL || 'https://sharksphere.onrender.com';
     const verificationUrl = `${backendUrl}/api/auth/verify-email/${token}`;
