@@ -21,6 +21,8 @@ model User {
   name               String
   emailVerified      Boolean  @default(false)
   verificationToken  String?  @unique
+  role               Role     @default(USER)
+  emailNotifications  Boolean  @default(true)
   createdAt          DateTime @default(now())
   updatedAt          DateTime @updatedAt
 
@@ -35,7 +37,13 @@ model Idea {
   id          String   @id @default(uuid())
   title       String
   description String   @db.Text
+  researchLink String?  @db.Text
   authorId    String
+  status      IdeaStatus @default(PENDING)
+  stage       Stage?
+  rejectionReason String? @db.Text
+  reviewedBy  String?
+  reviewedAt  DateTime?
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 
@@ -68,4 +76,21 @@ model Vote {
 enum VoteType {
   UPVOTE
   DOWNVOTE
+}
+
+enum Role {
+  USER
+  ADMIN
+}
+
+enum IdeaStatus {
+  PENDING
+  APPROVED
+  REJECTED
+}
+
+enum Stage {
+  IDEA
+  PROTOTYPE
+  REVENUE
 }
