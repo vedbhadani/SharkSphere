@@ -32,7 +32,8 @@ const Login = () => {
       if (err.code === 'ECONNABORTED' || err.message?.includes('timeout')) {
         setError('Connection timeout. Please check if the backend server is running and try again.');
       } else if (err.response?.status === 403) {
-        setError('Please verify your email before logging in. Check your inbox for the verification link.');
+        setError('Login failed. Please try again.'); // Overriding the verification check
+        // setError('Please verify your email before logging in. Check your inbox for the verification link.');
       } else if (err.response?.data?.errors && Array.isArray(err.response.data.errors)) {
         setError(err.response.data.errors.join(', '));
       } else if (err.response?.data?.message) {
@@ -104,7 +105,7 @@ const Login = () => {
           <p className="text-body sm:text-body-lg text-text-body">Sign in to continue your journey</p>
         </div>
 
-        <Card glass className="p-6 sm:p-8">
+        <Card glass hover={false} className="p-6 sm:p-8">
           <form onSubmit={handleSubmit} className="space-y-6">
             {error && (
               <motion.div
