@@ -210,12 +210,6 @@ The platform uses a strict dark theme design system:
 - **Profile** (`/profile`) - User profile and submitted ideas
 - **Admin Dashboard** (`/admin`) - Content moderation and platform statistics
 
-## 🧪 Testing
-
-A default admin account is seeded for testing the admin features locally:
-- **Email:** `testadmin@sharksphere.com`
-- **Password:** `adminpassword123`
-
 ## 🤝 Contributing
 
 1. Fork the repository
