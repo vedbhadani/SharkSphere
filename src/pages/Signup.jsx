@@ -23,11 +23,13 @@ const Signup = () => {
     setLoading(true);
 
     // Frontend validation
+    /*
     if (!email.endsWith('@adypu.edu.in')) {
       setError('Email must be from @adypu.edu.in domain');
       setLoading(false);
       return;
     }
+    */
 
     if (password.length < 8) {
       setError('Password must be at least 8 characters long');
@@ -44,7 +46,7 @@ const Signup = () => {
     try {
       const response = await registerApi(email, password, name);
       if (response.success) {
-        setSuccess(response.message || 'Registration successful! Please check your email to verify your account.');
+        setSuccess(response.message || 'Registration successful!'); // Commented out email verification message
         setTimeout(() => {
           navigate('/login');
         }, 3000);
@@ -52,7 +54,7 @@ const Signup = () => {
     } catch (err) {
       console.error('Registration error:', err);
       console.error('Error response data:', err.response?.data);
-      
+
       // Handle timeout/network errors
       if (err.code === 'ECONNABORTED' || err.message?.includes('timeout')) {
         const isProduction = !import.meta.env.DEV;
@@ -64,7 +66,7 @@ const Signup = () => {
       } else if (err.response?.status === 400) {
         // 400 Bad Request - usually validation errors
         const errorData = err.response?.data;
-        
+
         if (errorData?.errors && Array.isArray(errorData.errors)) {
           // Backend validation errors array
           setError(errorData.errors.join('. '));
@@ -160,7 +162,7 @@ const Signup = () => {
           <p className="text-body sm:text-body-lg text-text-body">Start your entrepreneurial journey today</p>
         </div>
 
-        <Card glass className="p-6 sm:p-8">
+        <Card glass hover={false} className="p-6 sm:p-8">
           <form onSubmit={handleSubmit} className="space-y-6">
             {success && (
               <motion.div
@@ -200,8 +202,8 @@ const Signup = () => {
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               required
-              placeholder="you@adypu.edu.in"
-              helperText="Must be from @adypu.edu.in domain"
+              placeholder="you@example.com"
+              helperText="ADYPU domain restricted (Disabled for testing)"
             />
 
             <Input
