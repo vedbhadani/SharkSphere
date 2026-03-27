@@ -63,6 +63,11 @@ const Navbar = () => {
                 <NavLink to="/profile" isActive={isActive('/profile')}>
                   Profile
                 </NavLink>
+                {user.role === 'ADMIN' && (
+                  <NavLink to="/admin" isActive={isActive('/admin')}>
+                    Admin
+                  </NavLink>
+                )}
                 <button
                   onClick={handleLogout}
                   className="ml-2 px-3 lg:px-4 py-2 text-sm font-medium text-text-body hover:text-text-heading hover:bg-bg-secondary/50 rounded-lg transition-all duration-200"
@@ -134,7 +139,7 @@ const Navbar = () => {
               exit={{ x: '100%' }}
               transition={{ type: 'spring', damping: 30, stiffness: 300 }}
               className="fixed top-16 sm:top-20 right-0 bottom-0 w-72 sm:w-80 bg-bg-secondary border-l-2 border-border-light z-[110] md:hidden overflow-y-auto shadow-2xl"
-              style={{ 
+              style={{
                 backgroundColor: '#13131A',
                 minHeight: 'calc(100vh - 64px)'
               }}
@@ -154,6 +159,11 @@ const Navbar = () => {
                     <MobileNavLink to="/profile" isActive={isActive('/profile')} onClick={closeMobileMenu}>
                       Profile
                     </MobileNavLink>
+                    {user.role === 'ADMIN' && (
+                      <MobileNavLink to="/admin" isActive={isActive('/admin')} onClick={closeMobileMenu}>
+                        Admin
+                      </MobileNavLink>
+                    )}
                     <button
                       onClick={handleLogout}
                       className="px-4 py-3 text-left text-sm font-medium text-text-body hover:text-text-heading hover:bg-bg-tertiary rounded-lg transition-all duration-200 mt-2"
@@ -206,15 +216,14 @@ const NavLink = ({ to, isActive, children }) => {
   return (
     <Link
       to={to}
-      className={`relative px-3 lg:px-4 py-2 sm:py-2.5 text-sm font-medium transition-all duration-200 rounded-lg ${
-        isActive
-          ? 'text-purple-neon'
-          : 'text-text-body hover:text-text-heading'
-      }`}
+      className={`relative px-3 lg:px-4 py-2 sm:py-2.5 text-sm font-medium transition-all duration-200 rounded-lg ${isActive
+        ? 'text-purple-neon'
+        : 'text-text-body hover:text-text-heading'
+        }`}
     >
       {isActive && (
         <motion.div
-          layoutId="activeTab"
+          layoutId="navbarTabBase"
           className="absolute inset-0 bg-bg-secondary/80 backdrop-blur-sm border border-purple-accent/30 rounded-lg -z-10 shadow-glow-purple"
           transition={{ type: 'spring', stiffness: 380, damping: 30 }}
         />
@@ -229,11 +238,10 @@ const MobileNavLink = ({ to, isActive, onClick, children }) => {
     <Link
       to={to}
       onClick={onClick}
-      className={`px-4 py-3 text-sm font-medium transition-all duration-200 rounded-lg ${
-        isActive
-          ? 'text-purple-neon bg-bg-tertiary border border-purple-accent/30'
-          : 'text-text-body hover:text-text-heading hover:bg-bg-tertiary'
-      }`}
+      className={`px-4 py-3 text-sm font-medium transition-all duration-200 rounded-lg ${isActive
+        ? 'text-purple-neon bg-bg-tertiary border border-purple-accent/30'
+        : 'text-text-body hover:text-text-heading hover:bg-bg-tertiary'
+        }`}
     >
       {children}
     </Link>

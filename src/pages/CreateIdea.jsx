@@ -7,13 +7,32 @@ import Button from '../components/Button.jsx';
 import Input from '../components/Input.jsx';
 import Card from '../components/Card.jsx';
 
+const questions = [
+  { id: 'problem', label: '1. Problem Statement', placeholder: 'Describe the problem your idea addresses...' },
+  { id: 'solution', label: '2. Your Solution', placeholder: 'Explain how your idea solves the problem...' },
+  { id: 'whyNow', label: '3. Why Now?', placeholder: 'What changed recently that makes this idea important today?' },
+  { id: 'targetUsers', label: '4. Target Users', placeholder: 'Who are your users? Describe them clearly.' },
+  { id: 'progress', label: '5. Progress So Far', placeholder: 'Idea / Prototype / MVP / Users / Revenue' },
+  { id: 'team', label: '6. Co-Founder / Team Requirements', placeholder: 'Do you have a team? If not, what skills are you looking for?' },
+  { id: 'competitors', label: '7. Competitors', placeholder: 'Who else is doing this and how are you different?' },
+  { id: 'vision', label: '8. Long-Term Vision', placeholder: 'If this succeeds, what will it look like in 5 years?' },
+  { id: 'slack', label: '9. Slack Username', placeholder: 'Share your Slack username for collaboration.' },
+  { id: 'research', label: '10. Additional Research / Drive Link', placeholder: 'Share your drive link with additional data you want to share' }
+];
+
 const CreateIdea = () => {
   const [title, setTitle] = useState('');
-  const [description, setDescription] = useState('');
+  const [answers, setAnswers] = useState(
+    questions.reduce((acc, q) => ({ ...acc, [q.id]: '' }), {})
+  );
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState(false);
   const navigate = useNavigate();
+
+  const handleAnswerChange = (id, value) => {
+    setAnswers(prev => ({ ...prev, [id]: value }));
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -21,15 +40,23 @@ const CreateIdea = () => {
     setSuccess(false);
     setLoading(true);
 
+    // Concatenate answers for the single description field in backend
+    const combinedDescription = questions
+      .map(q => `**${q.label}**\n${answers[q.id]}`)
+      .join('\n\n');
+
+    // Extract research link for dedicated field
+    const researchLink = answers.research;
+
     try {
-      const response = await createIdea(title, description);
+      const response = await createIdea(title, combinedDescription, researchLink);
       if (response.success) {
         setSuccess(true);
         setTitle('');
-        setDescription('');
+        setAnswers(questions.reduce((acc, q) => ({ ...acc, [q.id]: '' }), {}));
         setTimeout(() => {
           navigate('/dashboard');
-        }, 1500);
+        }, 4000);
       }
     } catch (err) {
       setError(err.response?.data?.message || 'Failed to create idea. Please try again.');
@@ -65,18 +92,25 @@ const CreateIdea = () => {
           animate={{ opacity: 1, scale: 1 }}
           transition={{ duration: 0.4, delay: 0.1 }}
         >
-          <Card glass className="p-6 sm:p-8">
+          <Card glass hover={false} className="p-6 sm:p-8">
             {success && (
               <motion.div
                 initial={{ opacity: 0, scale: 0.9 }}
                 animate={{ opacity: 1, scale: 1 }}
-                className="bg-green-500/10 border border-green-500/30 text-green-400 px-6 py-4 rounded-lg mb-8 text-center"
+                className="bg-purple-neon/10 border border-purple-neon/30 text-purple-neon px-6 py-5 rounded-xl mb-8 text-center shadow-glow-purple/20"
               >
                 <div className="flex items-center justify-center gap-2 mb-2">
-                  <Sparkles className="w-5 h-5" />
-                  <div className="font-semibold">Idea created successfully!</div>
+                  <Sparkles className="w-6 h-6 animate-pulse" />
+                  <div className="text-xl font-bold tracking-tight">Idea Submitted Successfully!</div>
                 </div>
-                <div className="text-sm">Redirecting to ideas...</div>
+                <div className="text-base font-medium text-text-body/90">
+                  Your idea has been sent to the <span className="text-purple-neon font-bold">E-Cell Team</span>.
+                  We will notify you via email once it has been reviewed and approved.
+                </div>
+                <div className="text-xs mt-4 opacity-50 flex items-center justify-center gap-1">
+                  <span className="w-1.5 h-1.5 bg-purple-neon rounded-full animate-ping" />
+                  Redirecting to your dashboard...
+                </div>
               </motion.div>
             )}
 
@@ -90,60 +124,47 @@ const CreateIdea = () => {
               </motion.div>
             )}
 
-            <form onSubmit={handleSubmit} className="space-y-6">
-              <Input
-                label="Title"
-                type="text"
-                value={title}
-                onChange={(e) => setTitle(e.target.value)}
-                required
-                minLength={5}
-                placeholder="A short, descriptive title for your idea"
-                helperText="Minimum 5 characters"
-              />
-
-              <div>
-                <label className="block text-sm font-semibold text-text-body mb-2.5">
-                  Description
-                </label>
-                <textarea
-                  value={description}
-                  onChange={(e) => setDescription(e.target.value)}
+            <form onSubmit={handleSubmit} className="space-y-10">
+              <div className="space-y-4">
+                <h3 className="text-xl font-bold text-purple-neon flex items-center gap-2">
+                  <div className="w-1.5 h-6 bg-purple-neon rounded-full" />
+                  Idea Title
+                </h3>
+                <Input
+                  type="text"
+                  value={title}
+                  onChange={(e) => setTitle(e.target.value)}
                   required
-                  minLength={10}
-                  rows={10}
-                  className="w-full px-4 py-3.5 bg-bg-secondary/50 backdrop-blur-sm border border-border-light rounded-lg text-sm sm:text-base text-text-heading placeholder-text-muted focus:outline-none focus:ring-2 focus:ring-purple-neon focus:border-purple-neon focus:shadow-glow-purple transition-all duration-300 resize-none leading-relaxed hover:border-purple-DEFAULT/50"
-                  placeholder="Description must be filled in the format given below!!!"
+                  minLength={5}
+                  placeholder="A short, descriptive title for your idea"
+                  helperText="Minimum 5 characters"
                 />
-<p className="mt-2 text-xs text-text-muted">
-  <strong>1. Problem Statement</strong><br />
-  Describe the problem.<br /><br />
+              </div>
 
-  <strong>2. Your Solution</strong><br />
-  Explain how your idea solves the problem.<br /><br />
+              <div className="space-y-8">
+                <div className="border-b border-border/50 pb-6">
+                  <h3 className="text-2xl font-bold text-purple-neon flex items-center gap-2">
+                    <div className="w-1.5 h-6 bg-purple-neon rounded-full" />
+                    Project Details
+                  </h3>
+                </div>
 
-  <strong>3. Why Now?</strong><br />
-  What changed recently that makes this idea important today?<br /><br />
-
-  <strong>4. Target Users</strong><br />
-  Who are your users? Describe them clearly.<br /><br />
-
-  <strong>5. Progress So Far</strong><br />
-  Idea / Prototype / MVP / Users / Revenue<br /><br />
-
-  <strong>6. Co-Founder / Team Requirements</strong><br />
-  Do you have a team? If not, what skills are you looking for?<br /><br />
-
-  <strong>7. Competitors</strong><br />
-  Who else is doing this and how are you different?<br /><br />
-
-  <strong>8. Long-Term Vision</strong><br />
-  If this succeeds, what will it look like in 5 years?<br /><br />
-
-  <strong>9. Slack Username</strong><br />
-  Share your Slack username for collaboration.
-</p>
-
+                {questions.map((q) => (
+                  <div key={q.id}>
+                    <label className="block text-sm font-semibold text-text-body mb-2.5">
+                      {q.label}
+                    </label>
+                    <textarea
+                      value={answers[q.id]}
+                      onChange={(e) => handleAnswerChange(q.id, e.target.value)}
+                      required
+                      minLength={2}
+                      rows={4}
+                      className="w-full px-4 py-3.5 bg-bg-secondary/50 backdrop-blur-sm border border-border-light rounded-lg text-sm text-text-heading placeholder-text-muted focus:outline-none focus:ring-2 focus:ring-purple-neon focus:border-purple-neon focus:shadow-glow-purple transition-all duration-300 resize-none leading-relaxed hover:border-purple-DEFAULT/50"
+                      placeholder={q.placeholder}
+                    />
+                  </div>
+                ))}
               </div>
 
               <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 pt-4">

@@ -10,13 +10,13 @@ export const getIdeaById = async (id) => {
   return response.data;
 };
 
-export const createIdea = async (title, description) => {
-  const response = await api.post('/ideas', { title, description });
+export const createIdea = async (title, description, researchLink) => {
+  const response = await api.post('/ideas', { title, description, researchLink });
   return response.data;
 };
 
-export const updateIdea = async (id, title, description) => {
-  const response = await api.put(`/ideas/${id}`, { title, description });
+export const updateIdea = async (id, title, description, researchLink) => {
+  const response = await api.put(`/ideas/${id}`, { title, description, researchLink });
   return response.data;
 };
 

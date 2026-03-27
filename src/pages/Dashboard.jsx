@@ -1,7 +1,7 @@
 import { useState, useEffect, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Link } from 'react-router-dom';
-import { Trash2, Eye, Search, ArrowUp, Plus, Filter, Lightbulb } from 'lucide-react';
+import { Trash2, Eye, Search, ArrowUp, Plus, Filter, Lightbulb, FileText, TrendingUp, Clock } from 'lucide-react';
 import { getAllIdeas, deleteIdea } from '../api/ideas.js';
 import { toggleVote } from '../api/votes.js';
 import { useAuth } from '../context/AuthContext.jsx';
@@ -9,6 +9,7 @@ import Button from '../components/Button.jsx';
 import Card from '../components/Card.jsx';
 import Input from '../components/Input.jsx';
 import IdeaModal from '../components/IdeaModal.jsx';
+import { stripMarkdown } from '../utils/text.js';
 
 const Dashboard = () => {
   const [ideas, setIdeas] = useState([]);
@@ -246,125 +247,145 @@ const Dashboard = () => {
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 relative z-10">
               <AnimatePresence>
                 {filteredAndSortedIdeas.map((idea, index) => {
-                const isPositive = idea.votes?.total > 0;
-                const voteCount = idea.votes?.total || 0;
+                  const isPositive = idea.votes?.total > 0;
+                  const voteCount = idea.votes?.total || 0;
 
-                return (
-                  <motion.div
-                    key={idea.id}
-                    initial={{ opacity: 0, y: 30 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    exit={{ opacity: 0, scale: 0.9 }}
-                    transition={{ duration: 0.3, delay: index * 0.03 }}
-                    layout
-                    className="h-full"
-                  >
-                    <Card hover glass className="h-full flex flex-col min-h-[280px] sm:min-h-[320px]">
-                      <div className="flex-1 mb-4 flex flex-col">
-                        <div className="flex items-start justify-between gap-3 mb-3">
-                          <h3 className="text-h4 font-semibold text-text-heading line-clamp-2 flex-1">
-                            {idea.title}
-                          </h3>
-                          <div className="flex items-center gap-2">
-                            {(() => {
-                              const created = new Date(idea.createdAt);
-                              const days = (Date.now() - created.getTime()) / (1000 * 60 * 60 * 24);
-                              const voteTotal = idea.votes?.total || 0;
-                              return (
-                                <>
-                                  {days < 7 && (
-                                    <span className="px-2 py-1 rounded-full text-[10px] font-semibold bg-bg-tertiary border border-border-light text-text-muted">New</span>
-                                  )}
-                                  {voteTotal >= 5 && (
-                                    <span className="px-2 py-1 rounded-full text-[10px] font-semibold bg-purple-DEFAULT/15 border border-purple-neon/30 text-purple-neon">Trending</span>
-                                  )}
-                                </>
-                              );
-                            })()}
-                          </div>
-                          {user && idea.author.id === user.id && (
-                            <motion.button
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                handleDelete(idea.id);
-                              }}
-                              disabled={deletingIds.has(idea.id)}
-                              whileHover={{ scale: 1.1 }}
-                              whileTap={{ scale: 0.9 }}
-                              className="flex-shrink-0 p-2 rounded-lg text-red-400 hover:bg-red-500/10 hover:text-red-300 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-                              title="Delete idea"
-                            >
-                              <Trash2 className="w-4 h-4" strokeWidth={2} />
-                            </motion.button>
-                          )}
-                        </div>
-                        <p
-                          className="text-body text-text-body leading-relaxed line-clamp-4 flex-1 mb-4"
-                          style={{
-                            display: '-webkit-box',
-                            WebkitLineClamp: 4,
-                            WebkitBoxOrient: 'vertical',
-                            overflow: 'hidden',
-                          }}
-                        >
-                          {idea.description}
-                        </p>
-                        <motion.button
-                          onClick={() => handleViewDetails(idea)}
-                          whileHover={{ scale: 1.02 }}
-                          whileTap={{ scale: 0.98 }}
-                          className="flex items-center gap-2 text-sm font-medium text-purple-neon hover:text-purple-accent transition-colors mb-4 group"
-                        >
-                          <Eye className="w-4 h-4 group-hover:scale-110 transition-transform" />
-                          View Details
-                        </motion.button>
-                      </div>
-
-                      <div className="pt-4 border-t border-border-light mt-auto">
-                        <div className="flex items-center justify-between">
-                          <div className="flex items-center gap-3">
-                            <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-purple-DEFAULT to-purple-neon flex items-center justify-center text-white text-xs font-bold shadow-glow-purple">
-                              {idea.author.name.charAt(0).toUpperCase()}
+                  return (
+                    <motion.div
+                      key={idea.id}
+                      initial={{ opacity: 0, y: 30 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      exit={{ opacity: 0, scale: 0.9 }}
+                      transition={{ duration: 0.3, delay: index * 0.03 }}
+                      layout
+                      className="h-full"
+                    >
+                      <Card hover glass className="p-0 h-full flex flex-col min-h-[300px] overflow-hidden border-white/5 hover:border-purple-neon/20 transition-all duration-300 group shadow-lg">
+                        {/* Card Header */}
+                        <div className="p-5 border-b border-white/5 bg-white/[0.02]">
+                          <div className="flex justify-between items-start mb-3">
+                            <div className="flex-1 min-w-0">
+                              <div className="flex items-center gap-2 mb-1 flex-wrap">
+                                <h3 className="text-lg font-bold text-text-heading truncate tracking-tight group-hover:text-purple-neon transition-colors">
+                                  {idea.title}
+                                </h3>
+                                {idea.stage && (
+                                  <span className={`text-[10px] px-2.5 py-0.5 rounded-full font-black uppercase tracking-widest flex items-center gap-1.5 shadow-[0_0_15px_-3px] transition-all duration-300 ${idea.stage === 'REVENUE'
+                                    ? 'bg-green-500/20 text-green-400 border border-green-500/30 shadow-green-500/20' :
+                                    idea.stage === 'PROTOTYPE'
+                                      ? 'bg-blue-500/20 text-blue-400 border border-blue-500/30 shadow-blue-500/20' :
+                                      'bg-purple-500/20 text-purple-400 border border-purple-500/30 shadow-purple-500/20'
+                                    }`}>
+                                    <span className={`w-1 h-1 rounded-full animate-pulse ${idea.stage === 'REVENUE' ? 'bg-green-400' :
+                                      idea.stage === 'PROTOTYPE' ? 'bg-blue-400' : 'bg-purple-400'
+                                      }`} />
+                                    {idea.stage}
+                                  </span>
+                                )}
+                              </div>
+                              <div className="flex items-center gap-2">
+                                {(() => {
+                                  const created = new Date(idea.createdAt);
+                                  const days = (Date.now() - created.getTime()) / (1000 * 60 * 60 * 24);
+                                  const voteTotal = idea.votes?.total || 0;
+                                  return (
+                                    <>
+                                      {days < 7 && (
+                                        <span className="flex items-center gap-1 text-[9px] font-bold text-cyan-400 uppercase tracking-widest bg-cyan-500/5 px-2 py-0.5 rounded-md border border-cyan-500/10">
+                                          <Clock className="w-2.5 h-2.5" />
+                                          New
+                                        </span>
+                                      )}
+                                      {voteTotal >= 5 && (
+                                        <span className="flex items-center gap-1 text-[9px] font-bold text-amber-400 uppercase tracking-widest bg-amber-500/5 px-2 py-0.5 rounded-md border border-amber-500/10">
+                                          <TrendingUp className="w-2.5 h-2.5" />
+                                          Trending
+                                        </span>
+                                      )}
+                                    </>
+                                  );
+                                })()}
+                              </div>
                             </div>
-                            <div>
-                              <div className="text-sm font-semibold text-text-heading">
-                                {idea.author.name}
+                            {user && idea.author.id === user.id && (
+                              <motion.button
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  handleDelete(idea.id);
+                                }}
+                                disabled={deletingIds.has(idea.id)}
+                                whileHover={{ scale: 1.1, color: '#ef4444' }}
+                                whileTap={{ scale: 0.9 }}
+                                className="p-1.5 rounded-md text-text-muted hover:bg-red-500/10 transition-all opacity-40 group-hover:opacity-100"
+                              >
+                                <Trash2 className="w-3.5 h-3.5" />
+                              </motion.button>
+                            )}
+                          </div>
+                        </div>
+
+                        {/* Card Body */}
+                        <div className="p-5 flex-1 relative flex flex-col">
+                          <div className="absolute top-0 right-0 p-4 opacity-[0.02] group-hover:opacity-[0.04] transition-opacity pointer-events-none">
+                            <Lightbulb className="w-16 h-16" />
+                          </div>
+                          <p className="text-text-body text-sm leading-relaxed line-clamp-4 flex-1 mb-4 relative z-10 opacity-90">
+                            {stripMarkdown(idea.description)}
+                          </p>
+
+                          <button
+                            onClick={() => handleViewDetails(idea)}
+                            className="flex items-center gap-2 text-[11px] font-bold uppercase tracking-widest text-text-muted hover:text-purple-neon transition-all mb-2 group/btn"
+                          >
+                            <Eye className="w-3.5 h-3.5 group-hover/btn:scale-110 transition-transform" />
+                            View More
+                          </button>
+                        </div>
+
+                        {/* Card Footer */}
+                        <div className="p-4 bg-white/[0.02] border-t border-white/5 mt-auto">
+                          <div className="flex items-center justify-between">
+                            <div className="flex items-center gap-2.5">
+                              <div className="w-7 h-7 rounded-md bg-gradient-to-br from-purple-600 to-purple-400 flex items-center justify-center text-white text-[10px] font-black shadow-lg">
+                                {idea.author.name.charAt(0).toUpperCase()}
+                              </div>
+                              <div className="flex flex-col">
+                                <span className="text-[11px] font-bold text-text-heading/90 leading-none mb-0.5">
+                                  {idea.author.name}
+                                </span>
+                                <span className="text-[9px] uppercase tracking-tighter text-text-muted/60 font-mono">
+                                  Contributor
+                                </span>
+                              </div>
+                            </div>
+
+                            <div className="flex items-center gap-2">
+                              <motion.button
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  handleVote(idea.id, 'UPVOTE');
+                                }}
+                                disabled={votingIds.has(idea.id)}
+                                whileHover={{ scale: 1.05 }}
+                                whileTap={{ scale: 0.95 }}
+                                className={`flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${isPositive
+                                  ? 'bg-purple-neon text-white shadow-[0_0_15px_rgba(123,95,255,0.4)] border border-purple-neon/20'
+                                  : 'bg-white/5 text-text-muted hover:bg-white/10 border border-white/5'
+                                  }`}
+                              >
+                                <ArrowUp className="w-3.5 h-3.5" strokeWidth={3} />
+                                <span>{idea.votes?.upvotes || 0}</span>
+                              </motion.button>
+                              <div className={`text-sm font-black min-w-[1.5rem] text-center ${isPositive ? 'text-purple-neon' : 'text-text-muted/40'}`}>
+                                {voteCount > 0 ? '+' : ''}{voteCount}
                               </div>
                             </div>
                           </div>
-
-                          <div className="flex items-center gap-3">
-                            <motion.button
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                handleVote(idea.id, 'UPVOTE');
-                              }}
-                              disabled={votingIds.has(idea.id)}
-                              whileHover={{ scale: 1.1 }}
-                              whileTap={{ scale: 0.9 }}
-                              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-semibold transition-all ${
-                                isPositive
-                                  ? 'bg-purple-DEFAULT/20 text-purple-neon border border-purple-neon/30 shadow-glow-purple'
-                                  : 'bg-bg-tertiary border border-border-light text-text-body hover:border-purple-DEFAULT/50'
-                              }`}
-                            >
-                              <ArrowUp className="w-4 h-4" strokeWidth={2.5} />
-                              <span>{idea.votes?.upvotes || 0}</span>
-                            </motion.button>
-                            <div
-                              className={`text-base font-bold min-w-[2rem] text-center ${
-                                isPositive ? 'text-purple-neon' : 'text-text-muted'
-                              }`}
-                            >
-                              {voteCount > 0 ? '+' : ''}{voteCount}
-                            </div>
-                          </div>
                         </div>
-                      </div>
-                    </Card>
-                  </motion.div>
-                );
-              })}
+                      </Card>
+                    </motion.div>
+                  );
+                })}
               </AnimatePresence>
             </div>
           </div>

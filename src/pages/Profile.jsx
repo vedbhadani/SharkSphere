@@ -7,6 +7,7 @@ import { getAllIdeas, deleteIdea } from '../api/ideas.js';
 import Button from '../components/Button.jsx';
 import Card from '../components/Card.jsx';
 import IdeaModal from '../components/IdeaModal.jsx';
+import { stripMarkdown } from '../utils/text.js';
 
 const Profile = () => {
   const { user, logout } = useAuth();
@@ -263,7 +264,7 @@ const Profile = () => {
                           overflow: 'hidden',
                         }}
                       >
-                        {idea.description}
+                        {stripMarkdown(idea.description)}
                       </p>
                       <motion.button
                         onClick={() => handleViewDetails(idea)}
@@ -272,7 +273,7 @@ const Profile = () => {
                         className="flex items-center gap-2 text-sm font-medium text-purple-neon hover:text-purple-accent transition-colors mb-4 group"
                       >
                         <Eye className="w-4 h-4 group-hover:scale-110 transition-transform" />
-                        View Details
+                        View More
                       </motion.button>
                     </div>
                     <div className="flex items-center justify-between pt-4 border-t border-border-light mt-auto">
