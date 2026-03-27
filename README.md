@@ -5,7 +5,8 @@ A modern, full-stack platform for NST students to turn ideas into real companies
 ## ✨ Features
 
 - **Idea Management**: Post, browse, and vote on startup ideas
-- **User Authentication**: Secure JWT-based authentication with email verification
+- **User Authentication**: Secure JWT-based authentication
+- **Admin & Moderation**: Dedicated admin panel for content moderation and platform analytics
 - **Voting System**: Upvote ideas to help the best ones rise
 - **User Profiles**: Track your ideas and engagement
 - **Modern UI**: Premium dark theme with purple accents, built with React + TailwindCSS
@@ -151,6 +152,12 @@ Ecell3/
 ### Votes
 - `POST /api/ideas/:id/vote` - Toggle vote on idea (protected)
 
+### Admin & Moderation
+- `GET /api/admin/stats` - Get platform statistics
+- `GET /api/admin/ideas` - Get ideas for moderation
+- `PUT /api/admin/ideas/:id/status` - Approve/reject ideas (Admin only)
+- `POST /api/admin/email` - Send manual email notifications (Admin only)
+
 ## 🎨 Design System
 
 The platform uses a strict dark theme design system:
@@ -187,7 +194,7 @@ The platform uses a strict dark theme design system:
 
 - JWT-based authentication
 - Password hashing with bcrypt
-- Email verification
+- Role-Based Access Control (RBAC) for Admin features
 - Protected routes
 - Input validation with Joi
 - CORS configuration
@@ -201,6 +208,13 @@ The platform uses a strict dark theme design system:
 - **Ideas** (`/dashboard`) - Browse and vote on ideas
 - **Create Idea** (`/create-idea`) - Submit new startup ideas
 - **Profile** (`/profile`) - User profile and submitted ideas
+- **Admin Dashboard** (`/admin`) - Content moderation and platform statistics
+
+## 🧪 Testing
+
+A default admin account is seeded for testing the admin features locally:
+- **Email:** `testadmin@sharksphere.com`
+- **Password:** `adminpassword123`
 
 ## 🤝 Contributing
 
