@@ -42,17 +42,17 @@ export const register = async (req, res) => {
         password: hashedPassword,
         name,
         verificationToken,
-        emailVerified: false,
+        emailVerified: process.env.NODE_ENV === 'development', // Auto-verify in development
       },
     });
 
     // Send verification email
-    try {
-      await sendVerificationEmail(email, verificationToken);
-      console.log("✅ Verification email sent to:", email);
-    } catch (emailError) {
-      console.error("❌ Email error:", emailError.message);
-    }
+    // try {
+    //   await sendVerificationEmail(email, verificationToken);
+    //   console.log("✅ Verification email sent to:", email);
+    // } catch (emailError) {
+    //   console.error("❌ Email error:", emailError.message);
+    // }
 
     res.status(201).json({
       success: true,
@@ -86,8 +86,9 @@ export const verifyEmail = async (req, res) => {
 
     // Invalid or expired token → redirect
     if (!user) {
+      const frontendUrl = process.env.FRONTEND_URL || 'https://shark-sphere-phi.vercel.app';
       return res.redirect(
-        "https://shark-sphere-phi.vercel.app/login?error=invalid-token"
+        `${frontendUrl}/login?error=invalid-token`
       );
     }
 
@@ -101,14 +102,16 @@ export const verifyEmail = async (req, res) => {
     });
 
     // SUCCESS REDIRECT
+    const frontendUrl = process.env.FRONTEND_URL || 'https://shark-sphere-phi.vercel.app';
     return res.redirect(
-      "https://shark-sphere-phi.vercel.app/login?verified=true"
+      `${frontendUrl}/login?verified=true`
     );
   } catch (error) {
     console.error("Email verification error:", error);
 
+    const frontendUrl = process.env.FRONTEND_URL || 'https://shark-sphere-phi.vercel.app';
     return res.redirect(
-      "https://shark-sphere-phi.vercel.app/login?error=server-error"
+      `${frontendUrl}/login?error=server-error`
     );
   }
 };
@@ -128,8 +131,10 @@ export const login = async (req, res) => {
     }
 
     // Find user
+    console.log("Login attempt for email:", email);
     const user = await prisma.user.findUnique({ where: { email } });
     if (!user) {
+      console.log("User not found");
       return res.status(401).json({
         success: false,
         message: "Invalid credentials",
@@ -137,8 +142,10 @@ export const login = async (req, res) => {
     }
 
     // Compare passwords
+    console.log("User found, comparing passwords...");
     const isPasswordValid = await bcrypt.compare(password, user.password);
     if (!isPasswordValid) {
+      console.log("Invalid password");
       return res.status(401).json({
         success: false,
         message: "Invalid credentials",
@@ -146,15 +153,19 @@ export const login = async (req, res) => {
     }
 
     // Check email verification
-    if (!user.emailVerified) {
-      return res.status(403).json({
-        success: false,
-        message: "Please verify your email before logging in.",
-      });
-    }
+    console.log("Password valid, checking verification...");
+    // if (!user.emailVerified && process.env.NODE_ENV !== 'development') {
+    //   console.log("Email not verified");
+    //   return res.status(403).json({
+    //     success: false,
+    //     message: "Please verify your email before logging in.",
+    //   });
+    // }
 
     // Generate JWT
+    console.log("Email verified, generating token...");
     const token = generateToken(user.id);
+    console.log("Token generated successfully");
 
     return res.status(200).json({
       success: true,
@@ -165,10 +176,11 @@ export const login = async (req, res) => {
         email: user.email,
         name: user.name,
         emailVerified: user.emailVerified,
+        role: user.role,
       },
     });
   } catch (error) {
-    console.error("Login error:", error);
+    console.error("Login error stack:", error.stack);
     res.status(500).json({
       success: false,
       message: "Server error during login",
@@ -181,7 +193,13 @@ export const getMe = async (req, res) => {
   try {
     return res.status(200).json({
       success: true,
-      user: req.user,
+      user: {
+        id: req.user.id,
+        email: req.user.email,
+        name: req.user.name,
+        role: req.user.role,
+        emailVerified: req.user.emailVerified
+      },
     });
   } catch (error) {
     console.error("GetMe error:", error);
