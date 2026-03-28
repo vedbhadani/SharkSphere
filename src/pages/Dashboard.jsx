@@ -260,7 +260,7 @@ const Dashboard = () => {
                       layout
                       className="h-full"
                     >
-                      <Card hover glass className="p-0 h-full flex flex-col min-h-[300px] overflow-hidden border-white/5 hover:border-purple-neon/20 transition-all duration-300 group shadow-lg">
+                      <Card hover glass className="p-0 h-full flex flex-col min-h-[300px] overflow-hidden border-white/5 hover:border-purple-neon/20 transition-all duration-300 group shadow-lg cursor-pointer" onClick={() => handleViewDetails(idea)}>
                         {/* Card Header */}
                         <div className="p-5 border-b border-white/5 bg-white/[0.02]">
                           <div className="flex justify-between items-start mb-3">
