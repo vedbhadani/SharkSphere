@@ -102,8 +102,7 @@ export const getAllIdeas = async (req, res) => {
     console.error("Get ideas error:", error.message, error.stack);
     res.status(500).json({
       success: false,
-      message: "Server error while fetching ideas",
-      detail: error.message  // expose in response temporarily for debugging
+      message: "Server error while fetching ideas"
     });
   }
 };
