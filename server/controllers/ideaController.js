@@ -99,10 +99,11 @@ export const getAllIdeas = async (req, res) => {
       ideas: ideasWithVotes
     });
   } catch (error) {
-    console.error("Get ideas error:", error);
+    console.error("Get ideas error:", error.message, error.stack);
     res.status(500).json({
       success: false,
-      message: "Server error while fetching ideas"
+      message: "Server error while fetching ideas",
+      detail: error.message  // expose in response temporarily for debugging
     });
   }
 };
